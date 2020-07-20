@@ -1,4 +1,4 @@
-# Discord 8MB MP4 Compreesor
+# Discord 8MB MP4 Compressor
 A tool that can compress any MP4 file to 8MB for Discord's 8MB file-sharing cap (unless you have Nitro).
 
 # How It Works

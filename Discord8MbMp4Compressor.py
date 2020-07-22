@@ -44,7 +44,7 @@ file.pack()
 def update_output(proc):
     line = proc.stdout.readline()
     if proc.poll() or line == '':
-        output_field.configure(text=f'Done! File: {mp4_file}-8MbShare.mp4"')
+        output_field.configure(text=f'Done! Video location: {mp4_file}-8MbShare.mp4"')
         browse_btn.configure(state=tkinter.NORMAL)
         abort_btn.configure(state=tkinter.DISABLED)
     else:
@@ -63,22 +63,41 @@ def compress(mp4_file):
     if platform.system() == 'Linux':
         origin_duration_s = subprocess.Popen(f'ffprobe -v error -show_entries format=duration -of default=noprint_wrappers=1:nokey=1 "{mp4_file}"', stdout=subprocess.PIPE, shell=True)
         origin_duration_s = float(origin_duration_s.stdout.readline())
-        print(origin_duration_s)
-        origin_audio_bitrate_kbit_s = subprocess.Popen(f'ffprobe -v error -select_streams a:0 -show_entries stream=bit_rate -of default=noprint_wrappers=1:nokey=1 "{mp4_file}"', stdout=subprocess.PIPE, shell=True)
-        target_audio_bitrate_kbit_s = float(origin_audio_bitrate_kbit_s.stdout.readline()) / 1000
-        print(target_audio_bitrate_kbit_s)
+        print('Video duration: ' + str(origin_duration_s))
+        origin_audio_bitrate_kbit_s = subprocess.Popen(f'ffprobe -v 0 -select_streams a:0 -show_entries stream=bit_rate -of compact=p=0:nk=1 "{mp4_file}"', stdout=subprocess.PIPE, shell=True)
+
+        try:
+            target_audio_bitrate_kbit_s = float(origin_audio_bitrate_kbit_s.stdout.readline()) / 1000
+            print('Audio bitrate: ' + str(target_audio_bitrate_kbit_s))
+        except:
+            target_audio_bitrate_kbit_s = 1
+            print('Audio bitrate: No audio detected')
+
         quick_mafs = ((8.0 * 8192.0) / (1.048576 * origin_duration_s) - target_audio_bitrate_kbit_s)
+
+        print('New video bitrate: ' + str(quick_mafs))
+        print('New video resolution: 720p')
+
         cmd = f'ffmpeg -y -i "{mp4_file}" -c:v libx264 -b:v {quick_mafs}k -vf scale=720:-2 -pass 1 -an -f mp4 /dev/null && ffmpeg -y -i "{mp4_file}" -c:v libx264 -b:v {quick_mafs}k -vf scale=720:-2 -pass 2 -c:a aac -b:a {target_audio_bitrate_kbit_s}k "{mp4_file}-8MbShare.mp4"'
         proc = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, universal_newlines=True, shell=True)
     elif platform.system() == 'Windows':
         origin_duration_s = subprocess.Popen(f'ffprobe.exe -v error -show_entries format=duration -of default=noprint_wrappers=1:nokey=1 "{mp4_file}"', stdout=subprocess.PIPE, shell=True)
         origin_duration_s = float(origin_duration_s.stdout.readline())
-        print(origin_duration_s)
-        origin_audio_bitrate_kbit_s = subprocess.Popen(f'ffprobe.exe -v error -select_streams a:0 -show_entries stream=bit_rate -of default=noprint_wrappers=1:nokey=1 "{mp4_file}"', stdout=subprocess.PIPE, shell=True)
-        target_audio_bitrate_kbit_s= float(origin_audio_bitrate_kbit_s.stdout.readline()) / 1000
-        print(target_audio_bitrate_kbit_s)
+        print('Video duration: ' + str(origin_duration_s))
+        origin_audio_bitrate_kbit_s = subprocess.Popen(f'ffprobe.exe -v 0 -select_streams a:0 -show_entries stream=bit_rate -of compact=p=0:nk=1 "{mp4_file}"', stdout=subprocess.PIPE, shell=True)
+
+        try:
+            target_audio_bitrate_kbit_s = float(origin_audio_bitrate_kbit_s.stdout.readline()) / 1000
+            print('Audio bitrate: ' + str(target_audio_bitrate_kbit_s))
+        except:
+            target_audio_bitrate_kbit_s = 1
+            print('Audio bitrate: No audio detected')
+
         quick_mafs = ((8.0 * 8192.0) / (1.048576 * origin_duration_s) - target_audio_bitrate_kbit_s)
-        print(quick_mafs)
+
+        print('New video bitrate: ' + str(quick_mafs))
+        print('New video resolution: 720p')
+
         cmd = f'ffmpeg.exe -y -i "{mp4_file}" -c:v libx264 -b:v {quick_mafs}k -vf scale=720:-2 -pass 1 -an -f mp4 temp && ffmpeg.exe -y -i "{mp4_file}" -c:v libx264 -b:v {quick_mafs}k -vf scale=720:-2 -pass 2 -c:a aac -b:a {target_audio_bitrate_kbit_s}k "{mp4_file}-8MbShare.mp4"'
         proc = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, universal_newlines=True, shell=True)
         

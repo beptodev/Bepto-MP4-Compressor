@@ -14,7 +14,7 @@ Extract ffmpeg.exe and ffprobe.exe to the same place Discord8MbMp4Compressor.exe
 Install ffmpeg and ffprobe through your package manager.
 
 ### Usage
-Windows: Run Discord8MbMp4Compressor.exe
+Windows: Run Discord8MbMp4Compressor_win.exe
 
 Linux: Run Discord8MbMp4Compressor_linux
 

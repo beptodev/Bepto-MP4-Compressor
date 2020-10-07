@@ -1,27 +1,13 @@
-## Discord 8MB MP4 Compressor
-A tool that can compress any MP4 file to 8MB for Discord's 8MB file-sharing cap (unless you have Nitro).
+## Bepto MP4 Compressor
+A tool to compress MP4 files to any resolution and file size.
+
+![Preview](https://i.imgur.com/HfpPMLp.png)
 
 ## How It Works
 Compresses MP4's using ffmpeg and ffprobe calcuations.
 
-## Prerequisites
-### Windows: https://ffmpeg.org/download.html#build-windows
+## Install
+### Windows
 
-Extract `ffmpeg.exe` and `ffprobe.exe` to the same directory as `Discord8MbMp4Compressor.exe`.
-
-### Linux: https://ffmpeg.org/download.html#build-linux
-
-Install `ffmpeg` and `ffprobe` through your package manager.
-
-## Issues:
-
-### `Segmentation fault (core dumped)`
-
-You may need to install `python3`, `tkinter` and `psutil` and run `RunDiscord8MbMp4Compressor.py` instead.
-
-### Usage
-Windows: Run `Discord8MbMp4Compressor_win.exe`
-
-Linux: Run `Discord8MbMp4Compressor_linux`
-
-Just Python: Run `Discord8MbMp4Compressor.py`
+Download the zip file and extract, keep `BeptoMP4Compressor.exe`, `ffmpeg.exe` and `ffprobe.exe` in the same directory.
+Feel free to update `ffmpeg.exe` and `ffprobe.exe` from their website: https://ffmpeg.org/download.html#build-windows

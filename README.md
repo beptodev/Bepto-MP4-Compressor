@@ -1,7 +1,7 @@
 ## Bepto MP4 Compressor
 A tool to compress MP4 files to any resolution and file size.
 
-![Preview](https://i.imgur.com/HfpPMLp.png)
+![Preview](https://i.imgur.com/aExPM97.png)
 
 ## How It Works
 Compresses MP4's using ffmpeg and ffprobe calcuations.

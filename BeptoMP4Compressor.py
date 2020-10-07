@@ -51,17 +51,17 @@ options_frame = tkinter.LabelFrame(text='Options', width=294, height=100)
 options_frame.pack()
 options_frame.pack_propagate(0)
 
-res_label = tkinter.Label(options_frame, text='Desired Video Resolution (ex. 720p)', width=28)
+res_label = tkinter.Label(options_frame, text='Resolution Width (ex. 1920px = 1080p)', width=28)
 res_label.grid(row=0, column=0)
 
 e_res = tkinter.Entry(options_frame, width=8, justify='center')
-e_res.insert(10, '720')
+e_res.insert(10, '1920')
 e_res.grid(row=0, column=1)
 
-res_hint_label = tkinter.Label(options_frame, text='p', width=4, justify='left')
+res_hint_label = tkinter.Label(options_frame, text='px', width=4, justify='left')
 res_hint_label.grid(row=0, column=2)
 
-size_label = tkinter.Label(options_frame, text='Desired File Size (ex. 8MB)', width=28)
+size_label = tkinter.Label(options_frame, text='Target File Size (ex. 8MB)', width=28)
 size_label.grid(row=1, column=0)
 
 e_size = tkinter.Entry(options_frame, width=8, justify='center')

@@ -9,7 +9,7 @@ Compresses MP4's using ffmpeg and ffprobe calcuations.
 ## Install
 ### Windows
 
-Download the zip file and extract, keep `BeptoMP4Compressor.exe`, `ffmpeg.exe` and `ffprobe.exe` in the same directory.
+Download the latest release and extract, keep `BeptoMP4Compressor.exe`, `ffmpeg.exe` and `ffprobe.exe` in the same directory.
 Feel free to update `ffmpeg.exe` and `ffprobe.exe` from their website: https://ffmpeg.org/download.html#build-windows
 
 ### Linux

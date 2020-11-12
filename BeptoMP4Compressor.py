@@ -55,7 +55,7 @@ res_label = tkinter.Label(options_frame, text='Resolution (width x height)', wid
 res_label.grid(row=0, column=0)
 
 e_res_w = tkinter.Entry(options_frame, width=7, justify='center')
-e_res_w.insert(10, '1920')
+e_res_w.insert(10, '1280')
 e_res_w.grid(row=0, column=1)
 
 res_w_hint_label = tkinter.Label(options_frame, text='w', width=4, justify='left')
@@ -138,6 +138,7 @@ def compress(mp4_file):
 
         cmd = f'ffmpeg.exe -y -i "{mp4_file}" -c:v libx264 -b:v {quick_mafs}k -vf scale={desired_w}:{desired_h} -pass 1 -an -f mp4 temp && ffmpeg.exe -y -i "{mp4_file}" -c:v libx264 -b:v {quick_mafs}k -vf scale={desired_w}:{desired_h} -pass 2 -c:a aac -b:a {target_audio_bitrate_kbit_s}k "{mp4_file}-Compressed.mp4"'
         proc = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, universal_newlines=True, shell=True)
+    
     elif platform.system() == "Linux":
         origin_duration_s = subprocess.Popen(f'ffprobe -v error -show_entries format=duration -of default=noprint_wrappers=1:nokey=1 "{mp4_file}"', stdout=subprocess.PIPE, shell=True)
         origin_duration_s = float(origin_duration_s.stdout.readline())

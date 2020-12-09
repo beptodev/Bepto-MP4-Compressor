@@ -1,7 +1,7 @@
-## Bepto MP4 Compressor
+## Hellbruh's Video Compressor
 A tool to compress MP4 files to any resolution and file size.
 
-![Preview](https://github.com/beptodev/Bepto-MP4-Compressor/raw/master/screenshot.png)
+![Preview](https://github.com/hellbruh/Bepto-MP4-Compressor/raw/master/screenshot.png)
 
 ## How It Works
 Compresses MP4's using ffmpeg and ffprobe calcuations.

@@ -72,7 +72,7 @@ class App:
         spacer_2.pack()
 
         # Output
-        output_frame = LabelFrame(master, width=380, height=290)
+        output_frame = LabelFrame(master, width=380, height=300)
         output_frame.pack()
         output_frame.pack_propagate(0)
 

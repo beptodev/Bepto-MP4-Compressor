@@ -30,10 +30,10 @@ class App:
 		self.info_frame.pack()
 		self.info_frame.pack_propagate(0)
 
-		self.info_title = Label(self.info_frame, text = 'Hellbruh Video Compressor 2.0', font = 'Arial 14 bold')
+		self.info_title = Label(self.info_frame, text = 'Terror Video Compressor 2.0', font = 'Arial 14 bold')
 		self.info_title.pack()
 
-		self.author_label = Label(self.info_frame, text = 'Created by Hellbruh\nCheck for updates @ github.com/hellbruh', font = 'Arial 8')
+		self.author_label = Label(self.info_frame, text = 'Created by Terror\nCheck for updates @ github.com/terrorhub', font = 'Arial 8')
 		self.author_label.pack()
 
 		# Options
@@ -225,6 +225,6 @@ root = Tk()
 app = App(root)
 root.protocol('WM_DELETE_WINDOW', app.close)
 root.wm_geometry('400x500')
-root.title('Hellbruh Video Compressor 2.0')
+root.title('Terror Video Compressor 2.0')
 root.resizable(0, 0)
 root.mainloop()

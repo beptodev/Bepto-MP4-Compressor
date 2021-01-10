@@ -10,7 +10,7 @@ class App:
 		# Version fetching
 		self.author = 'TERROR'
 		self.fetch_url = 'https://bep.to/downloads/tvc_version.txt'
-		self.cur_version = 'v.6.10-1.9.21'
+		self.cur_version = 'v.2.1.0'
 		self.latest_version = self.fetch_version()
 
 		# Bools
@@ -154,6 +154,8 @@ class App:
 				self.version = f'{self.cur_version} (Outdated)'
 			else:
 				self.version = f'{self.cur_version} (Latest)'
+
+			print('Successfully fetched version.')
 		except:
 			print('Error fetching version!')
 
@@ -194,7 +196,7 @@ class App:
 	
 	def update_output(self, proc):
 		line = proc.stdout.readline()
-		print(line)
+		# print(line)
 
 		if self.aborted:
 			self.output_field.configure(text = 'Aborted!')
@@ -257,7 +259,7 @@ class App:
 				desired_codec = '-c:v libx265'
 				print('Using h.265 video codec')
 
-			cmd = f'ffmpeg.exe -y -i "{file}" {desired_codec} -b:v {quick_mafs}k -r {self.desired_fps} -vf scale={self.desired_w}:{self.desired_h} -pass 1 -an -f mp4 temp && ffmpeg.exe -y -i "{file}" {desired_codec} -b:v {quick_mafs}k -r {self.desired_fps} -vf scale={self.desired_w}:{self.desired_h} -pass 2 {desired_audio} "{self.file_names[self.queue]}-Compressed{self.file_extensions[self.queue]}"'
+			cmd = f'ffmpeg.exe -y -i "{file}" {desired_codec} -b:v {quick_mafs}k -r {self.desired_fps} -vf scale={self.desired_w}:{self.desired_h} -pass 1 -an -f mp4 DELETE_AFTER_COMPRESSION && ffmpeg.exe -y -i "{file}" {desired_codec} -b:v {quick_mafs}k -r {self.desired_fps} -vf scale={self.desired_w}:{self.desired_h} -pass 2 {desired_audio} "{self.file_names[self.queue]}-Compressed{self.file_extensions[self.queue]}"'
 			proc = subprocess.Popen(cmd, stdout = subprocess.PIPE, stderr = subprocess.STDOUT, universal_newlines = True, shell = True)
 			
 			self.update_output(proc)
@@ -271,5 +273,6 @@ app = App(root)
 root.protocol('WM_DELETE_WINDOW', app.close)
 root.wm_geometry('400x500')
 root.title('TERROR Video Compressor')
+root.iconbitmap('icon.ico')
 root.resizable(0, 0)
 root.mainloop()

@@ -1,4 +1,4 @@
-import re, psutil, subprocess, os
+import re, psutil, subprocess, os, sys
 from urllib.request import Request, urlopen
 from tkinter import *
 from tkinter import filedialog
@@ -7,10 +7,12 @@ from pathlib import Path
 
 class App:
 	def __init__(self, root):
+		sys.setrecursionlimit(9999999) # Potential fix for recursion error during compression
+
 		# Version fetching
 		self.author = 'TERROR'
 		self.fetch_url = 'https://bep.to/downloads/tvc_version.txt'
-		self.cur_version = 'v.2.1.0'
+		self.cur_version = 'v.2.1.1'
 		self.latest_version = self.fetch_version()
 
 		# Bools
@@ -18,10 +20,14 @@ class App:
 		self.aborted = False
 
 		# File and directories
-		self.queue = 0
 		self.files = []
 		self.file_names = []
 		self.file_extensions = []
+		self.cur_queue = 0
+		self.cur_pass = 0
+		self.cur_video_length = 0.0
+		self.cur_video_progress_s = 0.0
+		self.cur_video_progress_percent = 0
 		self.app_dir = os.getcwd()
 
 		# Compression default properties
@@ -190,21 +196,47 @@ class App:
 			self.file_extensions.append(split_extension[1])
 			print(split_extension[0], split_extension[1])
 
-		self.output_field.configure(text = f'Selected files:\n{self.files}')
+		self.output_field.configure(text = f'Selected files:\n\n{self.files}')
 		print(f'Selected files: {self.files}')
 		root.update()
 	
 	def update_output(self, proc):
 		line = proc.stdout.readline()
-		# print(line)
 
 		if self.aborted:
-			self.output_field.configure(text = 'Aborted!')
+			self.output_field.configure(text = 'Aborted!\n\nThis may be due to too many duplicate frames or a manual abort. If you did not manually abort compression, try matching the framerate to the original video.')
+			self.is_compressing = False
+		elif 'failed' in line:
+			self.output_field.configure(text = f'Video {self.cur_queue + 1}/{len(self.files)} failed!\n\nTry again with different settings.')
+			self.is_compressing = False
 		elif proc.poll() or line == '':
-			self.output_field.configure(text = f'Completed!\nVideos outputted to {self.app_dir}')
+			self.output_field.configure(text = f'Completed!\n\nVideo(s) outputted to {self.app_dir}')
 			self.is_compressing = False
 		else:
-			self.output_field.configure(text = f'Compressing video {self.queue + 1}/{len(self.files)} to {self.desired_w} x {self.desired_h} {self.desired_fps}fps @ {self.desired_size}MB\n\n' + str(line), wraplength=370)
+			ffmpeg_time = []
+			h = 1
+			m = 1
+			s = 1
+			split_space = line.split(' ')
+
+			for split in split_space:
+				if 'dup=' in split:
+					split_equal = split.split('=')
+					if int(split_equal[1]) >= 300:
+						self.abort()
+
+			for split in split_space:
+				if 'time=' in split:
+					split_equal = split.split('=')
+					split_colon = split_equal[1].split(':')
+					h = float(split_colon[0])
+					m = float(split_colon[1])
+					s = float(split_colon[2])
+
+			self.cur_video_progress_sec = (h * 3600) + (m * 60) + s
+			self.cur_video_progress_percent = int((self.cur_video_progress_sec / self.cur_video_length) * 100)
+
+			self.output_field.configure(text = f'Compressing video {self.cur_queue + 1}/{len(self.files)} to {self.desired_w}x{self.desired_h} {self.desired_fps}fps @ {self.desired_size}MB\nProgress: {self.cur_video_progress_percent}% (2 passes)\n\nFFMPEG Output\n{str(line)}', wraplength=370)
 			root.update()
 			root.after(1, self.update_output(proc))
 	
@@ -228,6 +260,7 @@ class App:
 		for file in self.files:
 			origin_duration_s = subprocess.Popen(f'ffprobe.exe -v error -show_entries format=duration -of default=noprint_wrappers=1:nokey=1 "{file}"', stdout = subprocess.PIPE, shell = True)
 			origin_duration_s = float(origin_duration_s.stdout.readline())
+			self.cur_video_length = origin_duration_s
 
 			print('Video duration: ' + str(origin_duration_s))
 
@@ -240,12 +273,13 @@ class App:
 				target_audio_bitrate_kbit_s = 1
 				print('Audio bitrate: No audio detected')
 
-			print(f'New file size: {self.desired_size}MB')
+			print(f'Target file size: {self.desired_size}MB')
 
-			quick_mafs = ((self.desired_size * 8192.0) / (1.048576 * origin_duration_s) - target_audio_bitrate_kbit_s)
-			print('New video bitrate: ' + str(quick_mafs))
+			quick_mafs = max(1, ((self.desired_size * 8192.0) / (1.048576 * origin_duration_s) - target_audio_bitrate_kbit_s))
+			print('Calculated video bitrate: ' + str(quick_mafs))
 
-			print(f'New video resolution: {self.desired_w}:{self.desired_h} @ {self.desired_fps}fps')
+			print(f'New video resolution: {self.desired_w}x{self.desired_h}')
+			print(f'New video framerate: {self.desired_fps}')
 
 			desired_audio = f'-c:a aac -b:a {target_audio_bitrate_kbit_s}k'
 
@@ -259,14 +293,14 @@ class App:
 				desired_codec = '-c:v libx265'
 				print('Using h.265 video codec')
 
-			cmd = f'ffmpeg.exe -y -i "{file}" {desired_codec} -b:v {quick_mafs}k -r {self.desired_fps} -vf scale={self.desired_w}:{self.desired_h} -pass 1 -an -f mp4 DELETE_AFTER_COMPRESSION && ffmpeg.exe -y -i "{file}" {desired_codec} -b:v {quick_mafs}k -r {self.desired_fps} -vf scale={self.desired_w}:{self.desired_h} -pass 2 {desired_audio} "{self.file_names[self.queue]}-Compressed{self.file_extensions[self.queue]}"'
+			cmd = f'ffmpeg.exe -y -i "{file}" {desired_codec} -b:v {quick_mafs}k -r {self.desired_fps} -vf scale={self.desired_w}:{self.desired_h} -pass 1 -an -f mp4 DELETE_AFTER_COMPRESSION && ffmpeg.exe -y -i "{file}" {desired_codec} -b:v {quick_mafs}k -r {self.desired_fps} -vf scale={self.desired_w}:{self.desired_h} -pass 2 {desired_audio} "{self.file_names[self.cur_queue]}-Compressed{self.file_extensions[self.cur_queue]}"'
 			proc = subprocess.Popen(cmd, stdout = subprocess.PIPE, stderr = subprocess.STDOUT, universal_newlines = True, shell = True)
 			
 			self.update_output(proc)
 
-			self.queue += 1
+			self.cur_queue += 1
 
-		self.queue = 0
+		self.cur_queue = 0
 
 root = Tk()
 app = App(root)

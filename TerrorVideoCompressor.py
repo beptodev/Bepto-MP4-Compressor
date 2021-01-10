@@ -1,17 +1,30 @@
+import re, psutil, subprocess, os
+from urllib.request import Request, urlopen
 from tkinter import *
 from tkinter import filedialog
 from functools import partial
 from pathlib import Path
-import psutil
-import subprocess
 
 class App:
 	def __init__(self, root):
+		# Version fetching
+		self.author = 'TERROR'
+		self.fetch_url = 'https://bep.to/downloads/tvc_version.txt'
+		self.cur_version = 'v.6.10-1.9.21'
+		self.latest_version = self.fetch_version()
+
+		# Bools
 		self.is_compressing = False
 		self.aborted = False
 
+		# File and directories
+		self.queue = 0
+		self.files = []
+		self.file_names = []
+		self.file_extensions = []
+		self.app_dir = os.getcwd()
+
 		# Compression default properties
-		self.file = ''
 		self.w = '1280'
 		self.h = '720'
 		self.fps = '30'
@@ -23,17 +36,15 @@ class App:
 		self.desired_fps = '30'
 		self.desired_size = 8
 
-		self.pixel = PhotoImage(width = 1, height = 1)
-
 		# Info frame
 		self.info_frame = Frame(root, width = 400, height = 75)
 		self.info_frame.pack()
 		self.info_frame.pack_propagate(0)
 
-		self.info_title = Label(self.info_frame, text = 'Terror Video Compressor 2.0', font = 'Arial 14 bold')
+		self.info_title = Label(self.info_frame, text = f'{self.author} Video Compressor {self.version}', font = 'Arial 12 bold')
 		self.info_title.pack()
 
-		self.author_label = Label(self.info_frame, text = 'Created by Terror\nCheck for updates @ github.com/terrorhub', font = 'Arial 8')
+		self.author_label = Label(self.info_frame, text = f'Created by {self.author}\nCheck for updates @ github.com/terrorhub', font = 'Arial 8')
 		self.author_label.pack()
 
 		# Options
@@ -129,6 +140,24 @@ class App:
 
 		self.compress_button = Button(self.browse_frame, text = 'Compress', width = 15, command = self.compress)
 		self.compress_button.grid(row=0, column=1, padx=5)
+
+	def fetch_version(self):
+		msg = ''
+
+		try:
+			req = Request(self.fetch_url, headers = {'User-Agent': 'Mozilla/5.0'})
+			msg = str(urlopen(req).read())
+			msg = re.sub("['b]", '', msg)
+			self.latest_version = msg
+
+			if self.cur_version != self.latest_version:
+				self.version = f'{self.cur_version} (Outdated)'
+			else:
+				self.version = f'{self.cur_version} (Latest)'
+		except:
+			print('Error fetching version!')
+
+		return msg
 	
 	def abort(self):
 		for proc in psutil.process_iter():
@@ -147,9 +176,20 @@ class App:
 		root.destroy()
 	
 	def file_select(self):
-		f = filedialog.askopenfilename()
-		self.file = f
-		self.output_field.configure(text = self.file)
+		f = filedialog.askopenfilenames()
+		self.files = f
+		self.file_names.clear()
+		self.file_extensions.clear()
+
+		for file in self.files:
+			split_slash = file.split('/')
+			split_extension = os.path.splitext(split_slash[-1])
+			self.file_names.append(split_extension[0])
+			self.file_extensions.append(split_extension[1])
+			print(split_extension[0], split_extension[1])
+
+		self.output_field.configure(text = f'Selected files:\n{self.files}')
+		print(f'Selected files: {self.files}')
 		root.update()
 	
 	def update_output(self, proc):
@@ -159,16 +199,16 @@ class App:
 		if self.aborted:
 			self.output_field.configure(text = 'Aborted!')
 		elif proc.poll() or line == '':
-			self.output_field.configure(text = f'Done! Video location: {self.file}-Compressed.mp4"')
+			self.output_field.configure(text = f'Completed!\nVideos outputted to {self.app_dir}')
 			self.is_compressing = False
 		else:
-			self.output_field.configure(text=f'Compressing to {self.desired_w} x {self.desired_h} {self.desired_fps}fps @ {self.desired_size}MB\n' + str(line), wraplength=370)
+			self.output_field.configure(text = f'Compressing video {self.queue + 1}/{len(self.files)} to {self.desired_w} x {self.desired_h} {self.desired_fps}fps @ {self.desired_size}MB\n\n' + str(line), wraplength=370)
 			root.update()
 			root.after(1, self.update_output(proc))
 	
 	def compress(self):
-		if self.file == '':
-			print('No file selected!')
+		if self.files == '':
+			print('No files selected!')
 			return
 		
 		if self.is_compressing:
@@ -183,48 +223,53 @@ class App:
 		self.desired_fps = self.e_fps.get()
 		self.desired_size = int(self.e_size.get())
 
-		origin_duration_s = subprocess.Popen(f'ffprobe.exe -v error -show_entries format=duration -of default=noprint_wrappers=1:nokey=1 "{self.file}"', stdout = subprocess.PIPE, shell = True)
-		origin_duration_s = float(origin_duration_s.stdout.readline())
+		for file in self.files:
+			origin_duration_s = subprocess.Popen(f'ffprobe.exe -v error -show_entries format=duration -of default=noprint_wrappers=1:nokey=1 "{file}"', stdout = subprocess.PIPE, shell = True)
+			origin_duration_s = float(origin_duration_s.stdout.readline())
 
-		print('Video duration: ' + str(origin_duration_s))
+			print('Video duration: ' + str(origin_duration_s))
 
-		origin_audio_bitrate_kbit_s = subprocess.Popen(f'ffprobe.exe -v 0 -select_streams a:0 -show_entries stream=bit_rate -of compact=p=0:nk=1 "{self.file}"', stdout = subprocess.PIPE, shell = True)
+			origin_audio_bitrate_kbit_s = subprocess.Popen(f'ffprobe.exe -v 0 -select_streams a:0 -show_entries stream=bit_rate -of compact=p=0:nk=1 "{file}"', stdout = subprocess.PIPE, shell = True)
 
-		try:
-			target_audio_bitrate_kbit_s = float(origin_audio_bitrate_kbit_s.stdout.readline()) / 1000
-			print('Audio bitrate: ' + str(target_audio_bitrate_kbit_s))
-		except:
-			target_audio_bitrate_kbit_s = 1
-			print('Audio bitrate: No audio detected')
+			try:
+				target_audio_bitrate_kbit_s = float(origin_audio_bitrate_kbit_s.stdout.readline()) / 1000
+				print('Audio bitrate: ' + str(target_audio_bitrate_kbit_s))
+			except:
+				target_audio_bitrate_kbit_s = 1
+				print('Audio bitrate: No audio detected')
 
-		print(f'New file size: {self.desired_size}MB')
+			print(f'New file size: {self.desired_size}MB')
 
-		quick_mafs = ((self.desired_size * 8192.0) / (1.048576 * origin_duration_s) - target_audio_bitrate_kbit_s)
-		print('New video bitrate: ' + str(quick_mafs))
+			quick_mafs = ((self.desired_size * 8192.0) / (1.048576 * origin_duration_s) - target_audio_bitrate_kbit_s)
+			print('New video bitrate: ' + str(quick_mafs))
 
-		print(f'New video resolution: {self.desired_w}:{self.desired_h} @ {self.desired_fps}fps')
+			print(f'New video resolution: {self.desired_w}:{self.desired_h} @ {self.desired_fps}fps')
 
-		desired_audio = f'-c:a aac -b:a {target_audio_bitrate_kbit_s}k'
+			desired_audio = f'-c:a aac -b:a {target_audio_bitrate_kbit_s}k'
 
-		if self.mute_var.get() == 1:
-			desired_audio = '-an'
-			print('Audio muted')
-		
-		desired_codec = '-c:v libx264'
+			if self.mute_var.get() == 1:
+				desired_audio = '-an'
+				print('Audio muted')
+			
+			desired_codec = '-c:v libx264'
 
-		if self.h265_var.get() == 1:
-			desired_codec = '-c:v libx265'
-			print('Using h.265 video codec')
+			if self.h265_var.get() == 1:
+				desired_codec = '-c:v libx265'
+				print('Using h.265 video codec')
 
-		cmd = f'ffmpeg.exe -y -i "{self.file}" {desired_codec} -b:v {quick_mafs}k -r {self.desired_fps} -vf scale={self.desired_w}:{self.desired_h} -pass 1 -an -f mp4 temp && ffmpeg.exe -y -i "{self.file}" {desired_codec} -b:v {quick_mafs}k -r {self.desired_fps} -vf scale={self.desired_w}:{self.desired_h} -pass 2 {desired_audio} "{self.file}-Compressed.mp4"'
-		proc = subprocess.Popen(cmd, stdout = subprocess.PIPE, stderr = subprocess.STDOUT, universal_newlines = True, shell = True)
-		
-		self.update_output(proc)
+			cmd = f'ffmpeg.exe -y -i "{file}" {desired_codec} -b:v {quick_mafs}k -r {self.desired_fps} -vf scale={self.desired_w}:{self.desired_h} -pass 1 -an -f mp4 temp && ffmpeg.exe -y -i "{file}" {desired_codec} -b:v {quick_mafs}k -r {self.desired_fps} -vf scale={self.desired_w}:{self.desired_h} -pass 2 {desired_audio} "{self.file_names[self.queue]}-Compressed{self.file_extensions[self.queue]}"'
+			proc = subprocess.Popen(cmd, stdout = subprocess.PIPE, stderr = subprocess.STDOUT, universal_newlines = True, shell = True)
+			
+			self.update_output(proc)
+
+			self.queue += 1
+
+		self.queue = 0
 
 root = Tk()
 app = App(root)
 root.protocol('WM_DELETE_WINDOW', app.close)
 root.wm_geometry('400x500')
-root.title('Terror Video Compressor 2.0')
+root.title('TERROR Video Compressor')
 root.resizable(0, 0)
 root.mainloop()

@@ -164,7 +164,7 @@ class App:
 
 		# Create output folder
 		if not os.path.exists(os.getcwd() + '/output'):
-			os.mkdir(os.getcwd() + '/output')
+			os.mkdir(os.getcwd() + '/Output')
 			print('TVC: Created output directory.')
 
 
@@ -299,7 +299,7 @@ class App:
 			desired_codec = '-c:v libx265'
 			print('TVC: Set h.265 video codec')
 
-		cmd = f'{ffmpeg} -y -i "{self.files[self.cur_queue]}" {desired_codec} -b:v {quick_mafs}k -r {self.desired_fps} -vf scale={self.desired_w}:{self.desired_h} -pass 1 -an -f mp4 TEMP && {ffmpeg} -y -i "{self.files[self.cur_queue]}" {desired_codec} -b:v {quick_mafs}k -r {self.desired_fps} -vf scale={self.desired_w}:{self.desired_h} -pass 2 {desired_audio} "{os.getcwd()}/output/{self.file_names[self.cur_queue]}-Compressed{self.file_extensions[self.cur_queue]}"'
+		cmd = f'{ffmpeg} -y -i "{self.files[self.cur_queue]}" {desired_codec} -b:v {quick_mafs}k -r {self.desired_fps} -vf scale={self.desired_w}:{self.desired_h} -pass 1 -an -f mp4 TEMP && {ffmpeg} -y -i "{self.files[self.cur_queue]}" {desired_codec} -b:v {quick_mafs}k -r {self.desired_fps} -vf scale={self.desired_w}:{self.desired_h} -pass 2 {desired_audio} "{os.getcwd()}/Output/{self.file_names[self.cur_queue]}-Compressed{self.file_extensions[self.cur_queue]}"'
 		self.proc = subprocess.Popen(cmd, stdout = subprocess.PIPE, stderr = subprocess.STDOUT, universal_newlines = True, shell = True)
 		
 		self.update_output()
@@ -315,7 +315,7 @@ class App:
 			self.is_compressing = False
 		elif self.proc.poll() or line == '':
 			if self.cur_queue + 1 == len(self.files):
-				self.output_field.configure(text = f'Completed!\n\nVideo(s) outputted to {os.getcwd()}/output/')
+				self.output_field.configure(text = f'Completed!\n\nVideo(s) can be found in the Output folder.')
 				self.is_compressing = False
 
 				try:

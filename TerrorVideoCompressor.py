@@ -192,7 +192,7 @@ class App:
 		msg = ''
 
 		if self.os == 'Windows':
-			if path.exists('ffmpeg.exe') and path.exists('ffprobe.exe'):
+			if os.path.exists('ffmpeg.exe') and os.path.exists('ffprobe.exe'):
 				self.found_ffmpeg = True
 				msg = 'Ready!'
 			else:
@@ -362,6 +362,6 @@ app = App(root)
 root.protocol('WM_DELETE_WINDOW', app.close)
 root.wm_geometry('400x500')
 root.title('TERROR Video Compressor')
-# root.iconbitmap('icon.ico')
+if platform.system() == 'Windows': root.iconbitmap('icon.ico') # Only seems to work on Windows
 root.resizable(0, 0)
 root.mainloop()

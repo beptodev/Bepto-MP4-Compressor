@@ -4,7 +4,7 @@ A tool to compress video files to any resolution and file size using ffmpeg.
 ## Preview
 ![Screenshot 1](https://github.com/terrorhub/Terror-Video-Compressor/blob/master/screenshot.png)
 
-## Install Instructions
+## Setup
 1. Download and extract the latest release.
 
 2. Download ffmpeg and ffprobe.

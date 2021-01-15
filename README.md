@@ -1,12 +1,16 @@
 ## Terror's Video Compressor
-A tool to compress video files to any resolution and file size.
+A tool to compress video files to any resolution and file size using ffmpeg.
 
+## Preview
 ![Screenshot 1](https://github.com/terrorhub/Terror-Video-Compressor/blob/master/screenshot.png)
 
-## How It Works
-Compresses videos using ffmpeg and ffprobe calcuations.
-
 ## Install Instructions
-Download both of the included zip files in the latest release and extract them to the same directory.
-Keep `TerrorVideoCompressor.exe`, `icon.ico`, `ffmpeg.exe` and `ffprobe.exe` in the same directory.
-Feel free to update `ffmpeg.exe` and `ffprobe.exe` from their website: https://ffmpeg.org/download.html#build-windows
+1. Download and extract the latest release.
+
+2. Download ffmpeg and ffprobe.
+
+- Windows users require `ffmpeg.exe` and `ffprobe.exe` in the same directory as this application. Download them from https://ffmpeg.org/download.html#build-windows.
+
+- Linux users can install ffmpeg with their respective package managers. ex. `sudo apt install ffmpeg`.
+
+The app will warn you if you're missing ffmpeg.

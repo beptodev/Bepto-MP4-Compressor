@@ -163,7 +163,7 @@ class App:
 		self.compress_button.grid(row = 0, column = 1, padx = 5)
 
 		# Create output folder
-		if not os.path.exists(os.getcwd() + '/output'):
+		if not os.path.exists(os.getcwd() + '/Output'):
 			os.mkdir(os.getcwd() + '/Output')
 			print('TVC: Created output directory.')
 

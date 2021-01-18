@@ -10,7 +10,7 @@ class App:
 		# Version fetching
 		self.author = 'TERROR'
 		self.fetch_url = 'https://bep.to/downloads/tvc_version.txt'
-		self.cur_version = 'v.2.2.0'
+		self.cur_version = 'v.2.2.1'
 		self.latest_version = self.fetch_version()
 		self.os = platform.system()
 		self.proc = None
@@ -58,7 +58,7 @@ class App:
 		self.ffmpeg_label.pack()
 
 		# Options
-		self.options_frame = LabelFrame(root, width = 380)
+		self.options_frame = Frame(root, width = 380)
 		self.options_frame.pack()
 		self.options_frame.pack_propagate(0)
 
@@ -122,28 +122,28 @@ class App:
 
 		# Portrait Mode
 		self.portrait_label = Label(self.options_frame, text = 'Portrait Mode (Flip W and H)', width = 28)
-		self.portrait_label.grid(row = 4, column = 0)
+		self.portrait_label.grid(row = 5, column = 0)
 
 		self.portrait_var = IntVar()
 
 		self.c_portrait = Checkbutton(self.options_frame, variable = self.portrait_var)
-		self.c_portrait.grid(row = 4, column = 1)
+		self.c_portrait.grid(row = 5, column = 1)
 
 		# Spacer
 		self.spacer = Label(root, text = '' )
 		self.spacer.pack()
 
-		# Browse
-		self.browse_frame = Frame(root, width = 380, height = 150)
-		self.browse_frame.pack()
-		self.browse_frame.pack_propagate(0)
+		# Button Frame
+		self.button_frame = Frame(root, width = 380, height = 150)
+		self.button_frame.pack()
+		self.button_frame.pack_propagate(0)
 
 		# Spacer
 		self.spacer_2 = Label(root, text = '' )
 		self.spacer_2.pack()
 
 		# Output
-		self.output_frame = LabelFrame(root, width = 380, height = 230)
+		self.output_frame = LabelFrame(root, width = 380, height = 210)
 		self.output_frame.pack()
 		self.output_frame.pack_propagate(0)
 
@@ -153,13 +153,13 @@ class App:
 		self.output_field.pack()
 
 		# Buttons
-		self.browse_button = Button(self.browse_frame, text = 'Browse', width = 12, command = self.file_select)
+		self.browse_button = Button(self.button_frame, text = 'Browse', width = 12, command = self.file_select)
 		self.browse_button.grid(row = 0, column = 0, padx = 5)
 
-		self.abort_button = Button(self.browse_frame, text = 'Abort', width = 12, command = self.abort)
+		self.abort_button = Button(self.button_frame, text = 'Abort', width = 12, command = self.abort)
 		self.abort_button.grid(row = 0, column = 2, padx = 5)
 
-		self.compress_button = Button(self.browse_frame, text = 'Compress', width = 12, command = self.compress)
+		self.compress_button = Button(self.button_frame, text = 'Compress', width = 12, command = self.compress)
 		self.compress_button.grid(row = 0, column = 1, padx = 5)
 
 		# Create output folder
@@ -224,7 +224,7 @@ class App:
 	
 	def close(self):
 		self.abort()
-		print('Exiting.')
+		print('TVC: Exiting.')
 		root.destroy()
 	
 	def file_select(self):
@@ -245,7 +245,7 @@ class App:
 		root.update()
 	
 	def compress(self):
-		if self.files == '':
+		if not self.files:
 			print('TVC: No files selected!')
 			return
 		
@@ -306,6 +306,7 @@ class App:
 
 	def update_output(self):
 		line = self.proc.stdout.readline()
+		print(line)
 
 		if self.aborted:
 			self.output_field.configure(text = 'Aborted!\n\nThis may be due to too many duplicate frames or a manual abort. If you did not manually abort compression, try matching the framerate to the original video.')

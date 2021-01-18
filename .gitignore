@@ -136,3 +136,4 @@ DELETE_AFTER_COMPRESSION
 *.zip
 *.gz
 TerrorVideoCompressor
+TEMP

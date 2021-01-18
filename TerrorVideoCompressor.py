@@ -217,6 +217,14 @@ class App:
 				p = psutil.Process(proc.pid)
 				p.kill()
 
+				try:
+					os.remove('TEMP')
+					os.remove('ffmpeg2pass-0.log')
+					os.remove('ffmpeg2pass-0.log.mbtree')
+					print('TVC: Cleaned up logs and temp files.')
+				except:
+					print('TVC: No files to clean up.')
+
 				self.is_compressing = False
 				self.aborted = True
 

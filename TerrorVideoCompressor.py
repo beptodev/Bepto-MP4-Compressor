@@ -32,16 +32,18 @@ class App:
 		self.app_dir = os.getcwd()
 
 		# Compression default properties
-		self.w = '1280'
-		self.h = '720'
+		self.w = '1920'
+		self.h = '1080'
 		self.fps = '30'
-		self.size = '8'
+		self.size = '7'
+		self.extension = 'mp4'
 
 		# Compression desired properties
-		self.desired_w = '1280'
-		self.desired_h = '720'
+		self.desired_w = '1920'
+		self.desired_h = '1080'
 		self.desired_fps = '30'
-		self.desired_size = 8
+		self.desired_size = 7
+		self.desired_extension = ''
 
 		# Info frame
 		self.info_frame = Frame(root, width = 400, height = 75)
@@ -102,32 +104,43 @@ class App:
 		self.fps_hint_label = Label(self.options_frame, text = 'FPS', width = 4, justify = 'left')
 		self.fps_hint_label.grid(row = 2, column = 2)
 
+		# Extension
+		self.extension_label = Label(self.options_frame, text = 'File Extension (Original = Blank)', width = 28)
+		self.extension_label.grid(row = 3, column = 0)
+
+		self.e_extension = Entry(self.options_frame, width = 7, justify = 'center')
+		self.e_extension.insert(0, self.extension)
+		self.e_extension.grid(row = 3, column = 1)
+
+		self.extension_hint_label = Label(self.options_frame, text = '', width = 4, justify = 'left')
+		self.extension_hint_label.grid(row = 3, column = 2)
+
 		# Mute Audio
 		self.mute_label = Label(self.options_frame, text = 'Mute Audio', width = 28)
-		self.mute_label.grid(row = 3, column = 0)
+		self.mute_label.grid(row = 4, column = 0)
 
 		self.mute_var = IntVar()
 
 		self.c_mute = Checkbutton(self.options_frame, variable = self.mute_var)
-		self.c_mute.grid(row = 3, column = 1)
+		self.c_mute.grid(row = 4, column = 1)
 
 		# Video Codec
 		self.codec_label = Label(self.options_frame, text = 'Use h.265 (Higher quality)', width = 28)
-		self.codec_label.grid(row = 4, column = 0)
+		self.codec_label.grid(row = 5, column = 0)
 
 		self.h265_var = IntVar()
 
 		self.c_h265 = Checkbutton(self.options_frame, variable = self.h265_var)
-		self.c_h265.grid(row = 4, column = 1)
+		self.c_h265.grid(row = 5, column = 1)
 
 		# Portrait Mode
 		self.portrait_label = Label(self.options_frame, text = 'Portrait Mode (Flip W and H)', width = 28)
-		self.portrait_label.grid(row = 5, column = 0)
+		self.portrait_label.grid(row = 6, column = 0)
 
 		self.portrait_var = IntVar()
 
 		self.c_portrait = Checkbutton(self.options_frame, variable = self.portrait_var)
-		self.c_portrait.grid(row = 5, column = 1)
+		self.c_portrait.grid(row = 6, column = 1)
 
 		# Spacer
 		self.spacer = Label(root, text = '' )
@@ -249,7 +262,10 @@ class App:
 			print(split_extension[0], split_extension[1])
 
 		self.output_field.configure(text = f'Selected files:\n\n{self.files}')
+
 		print(f'TVC: Selected files:\n{self.files}')
+		print(f'TVC: Extensions:\n{self.file_extensions}')
+
 		root.update()
 	
 	def compress(self):
@@ -268,6 +284,7 @@ class App:
 		self.desired_h = self.e_res_h.get() if self.portrait_var.get() == 0 else self.e_res_w.get()
 		self.desired_fps = self.e_fps.get()
 		self.desired_size = int(self.e_size.get())
+		self.desired_extension = self.e_extension.get()
 
 		ffmpeg = 'ffmpeg' if self.os == 'Linux' else 'ffmpeg.exe'
 		ffprobe = 'ffprobe' if self.os == 'Linux' else 'ffprobe.exe'
@@ -278,24 +295,17 @@ class App:
 
 		print('TVC: Video duration: ' + str(origin_duration_s))
 
-		origin_audio_bitrate_kbit_s = subprocess.Popen(f'{ffprobe} -v 0 -select_streams a:0 -show_entries stream=bit_rate -of compact=p=0:nk=1 "{self.files[self.cur_queue]}"', stdout = subprocess.PIPE, shell = True)
-
-		try:
-			target_audio_bitrate_kbit_s = float(origin_audio_bitrate_kbit_s.stdout.readline()) / 1000
-			print('TVC: Set audio bitrate: ' + str(target_audio_bitrate_kbit_s))
-		except:
-			target_audio_bitrate_kbit_s = 1
-			print('TVC: No audio detected!')
+		target_audio_bitrate_kbit_s = 64000
 
 		print(f'TVC: Set file size: {self.desired_size}MB')
 
-		quick_mafs = max(1, ((self.desired_size * 8192.0) / (1.048576 * origin_duration_s) - target_audio_bitrate_kbit_s))
+		quick_mafs = max(1, ((self.desired_size * 8192.0) / (1.048576 * origin_duration_s) - (target_audio_bitrate_kbit_s / 1000)))
 		print('TVC: Set video bitrate: ' + str(quick_mafs))
 
 		print(f'TVC: Set resolution: {self.desired_w}x{self.desired_h}')
 		print(f'TVC: Set framerate: {self.desired_fps}')
 
-		desired_audio = f'-c:a aac -b:a {target_audio_bitrate_kbit_s}k'
+		desired_audio = f'-c:a aac -b:a {target_audio_bitrate_kbit_s / 1000}k'
 
 		if self.mute_var.get() == 1:
 			desired_audio = '-an'
@@ -306,6 +316,16 @@ class App:
 		if self.h265_var.get() == 1:
 			desired_codec = '-c:v libx265'
 			print('TVC: Set h.265 video codec')
+
+		if self.desired_extension != '':
+			new_extensions = []
+
+			for e in self.file_extensions:
+				new_extensions.append('.' + self.desired_extension)
+				
+			self.file_extensions = new_extensions
+
+			print(f'TVC: Set file extension: {self.desired_extension}')
 
 		cmd = f'{ffmpeg} -y -i "{self.files[self.cur_queue]}" {desired_codec} -b:v {quick_mafs}k -r {self.desired_fps} -vf scale={self.desired_w}:{self.desired_h} -pass 1 -an -f mp4 TEMP && {ffmpeg} -y -i "{self.files[self.cur_queue]}" {desired_codec} -b:v {quick_mafs}k -r {self.desired_fps} -vf scale={self.desired_w}:{self.desired_h} -pass 2 {desired_audio} "{os.getcwd()}/Output/{self.file_names[self.cur_queue]}-Compressed{self.file_extensions[self.cur_queue]}"'
 		self.proc = subprocess.Popen(cmd, stdout = subprocess.PIPE, stderr = subprocess.STDOUT, universal_newlines = True, shell = True)

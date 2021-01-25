@@ -10,10 +10,9 @@ class App:
 		# Version fetching
 		self.author = 'TERROR'
 		self.fetch_url = 'https://bep.to/downloads/tvc_version.txt'
-		self.cur_version = 'v.2.2.1'
+		self.cur_version = 'v.2.3.0'
 		self.latest_version = self.fetch_version()
 		self.os = platform.system()
-		self.proc = None
 
 		# Bools
 		self.found_ffmpeg = False
@@ -44,6 +43,9 @@ class App:
 		self.desired_fps = '30'
 		self.desired_size = 7
 		self.desired_extension = ''
+
+		# Compression output
+		self.proc = None
 
 		# Info frame
 		self.info_frame = Frame(root, width = 400, height = 75)
@@ -156,7 +158,7 @@ class App:
 		self.spacer_2.pack()
 
 		# Output
-		self.output_frame = LabelFrame(root, width = 380, height = 210)
+		self.output_frame = LabelFrame(root, width = 380, height = 190)
 		self.output_frame.pack()
 		self.output_frame.pack_propagate(0)
 
@@ -339,13 +341,16 @@ class App:
 		if self.aborted:
 			self.output_field.configure(text = 'Aborted!\n\nThis may be due to too many duplicate frames or a manual abort. If you did not manually abort compression, try matching the framerate to the original video.')
 			self.is_compressing = False
+			self.cur_queue = 0
 		elif 'failed' in line:
 			self.output_field.configure(text = f'Video {self.cur_queue + 1}/{len(self.files)} failed!\n\nTry again with different settings.')
 			self.is_compressing = False
+			self.cur_queue = 0
 		elif self.proc.poll() or line == '':
 			if self.cur_queue + 1 == len(self.files):
 				self.output_field.configure(text = f'Completed!\n\nVideo(s) can be found in the Output folder.')
 				self.is_compressing = False
+				self.cur_queue = 0
 
 				try:
 					os.remove('TEMP')
@@ -391,6 +396,11 @@ app = App(root)
 root.protocol('WM_DELETE_WINDOW', app.close)
 root.wm_geometry('400x500')
 root.title('TERROR Video Compressor')
-if platform.system() == 'Windows': root.iconbitmap('icon.ico') # Only seems to work on Windows
+
+try:
+	root.iconbitmap('icon.ico')
+except:
+	print("TVC: Couldn't load icon.")
+
 root.resizable(0, 0)
 root.mainloop()

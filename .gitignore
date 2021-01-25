@@ -128,7 +128,6 @@ ffmpeg2pass-0.log.mbtree
 temp
 HellbruhVideoCompressor_win.zip
 *.mp4
-*.ico
 DELETE_AFTER_COMPRESSION
 *.temp
 DELETE_AFTER_COMPRESSION

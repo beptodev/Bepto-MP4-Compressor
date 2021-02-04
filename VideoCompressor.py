@@ -8,8 +8,8 @@ from pathlib import Path
 class App:
 	def __init__(self, root):
 		# Version fetching
-		self.author = 'TERROR'
-		self.fetch_url = 'https://bep.to/downloads/tvc_version.txt'
+		self.author = 'Peb'
+		self.fetch_url = 'https://bep.to/downloads/pvc_version.txt'
 		self.cur_version = 'v.2.3.0'
 		self.latest_version = self.fetch_version()
 		self.os = platform.system()
@@ -55,7 +55,7 @@ class App:
 		self.info_title = Label(self.info_frame, text = f'{self.author} Video Compressor {self.version}', font = 'Arial 12 bold')
 		self.info_title.pack()
 
-		self.author_label = Label(self.info_frame, text = f'Created by {self.author}\nCheck for updates @ github.com/terrorhub', font = 'Arial 8')
+		self.author_label = Label(self.info_frame, text = f'Created by {self.author}\nCheck for updates @ github.com/pebfromweb', font = 'Arial 8')
 		self.author_label.pack()
 
 		self.ffmpeg_label = Label(self.info_frame, text = self.fetch_ffmpeg(), font = 'Arial 8')
@@ -395,12 +395,7 @@ root = Tk()
 app = App(root)
 root.protocol('WM_DELETE_WINDOW', app.close)
 root.wm_geometry('400x500')
-root.title('TERROR Video Compressor')
-
-try:
-	root.iconbitmap('icon.ico')
-except:
-	print("TVC: Couldn't load icon.")
+root.title('Peb Video Compressor')
 
 root.resizable(0, 0)
 root.mainloop()

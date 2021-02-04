@@ -1,8 +1,8 @@
-## Terror's Video Compressor
+## Peb's Video Compressor
 A tool to compress video files to any resolution and file size using ffmpeg.
 
 ## Preview
-![Screenshot 1](https://github.com/terrorhub/Terror-Video-Compressor/blob/master/screenshot.png)
+![Screenshot 1](https://github.com/pebfromweb/Video-Compressor/blob/master/screenshot.png)
 
 ## Setup
 1. Download and extract the latest release.

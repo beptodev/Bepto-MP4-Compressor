@@ -2,7 +2,7 @@
 A tool to compress video files to any resolution and file size using ffmpeg.
 
 ## Preview
-![Screenshot 1](https://github.com/pebfromweb/Video-Compressor/blob/master/screenshot.png)
+![Screenshot 1](https://github.com/pebfromweb/Pebs-Video-Compressor/blob/master/screenshot.png)
 
 ## Setup
 1. Download and extract the latest release.

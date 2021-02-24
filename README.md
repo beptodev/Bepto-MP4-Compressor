@@ -1,5 +1,5 @@
 ## Peb's Video Compressor
-A tool to compress video files to any resolution and file size using ffmpeg.
+A video compressor and converter.
 
 ## Preview
 ![Screenshot 1](https://github.com/pebfromweb/Pebs-Video-Compressor/blob/master/screenshot.png)

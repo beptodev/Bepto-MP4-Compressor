@@ -13,3 +13,6 @@ A video compressor and converter.
 - Remove audio from videos.
 
 and more!
+
+## Issues
+- Crashes while compressing a large queue of videos.

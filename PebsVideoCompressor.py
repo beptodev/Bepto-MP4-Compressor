@@ -7,10 +7,11 @@ from pathlib import Path
 
 class App:
 	def __init__(self, root):
+		sys.setrecursionlimit(1000000)
 		# Version fetching
 		self.author = 'Peb'
 		self.fetch_url = 'https://bep.to/downloads/pvc_version.txt'
-		self.cur_version = 'v2.4.0'
+		self.cur_version = 'v2.4.1'
 		self.version = self.cur_version
 		self.latest_version = 'Error'
 		self.outdated = self.fetch_version()
@@ -32,18 +33,18 @@ class App:
 		self.app_dir = os.getcwd()
 
 		# Compression default properties
-		self.w = '1920'
-		self.h = '1080'
-		self.fps = '30'
-		self.size = '7'
+		self.w = '1280'
+		self.h = '720'
+		self.fps = '24'
+		self.size = '8'
 		self.extension = 'mp4'
 
 		# Compression desired properties
-		self.desired_w = '1920'
-		self.desired_h = '1080'
-		self.desired_fps = '30'
-		self.desired_size = 7
-		self.desired_extension = ''
+		self.desired_w = self.w
+		self.desired_h = self.h
+		self.desired_fps = self.fps
+		self.desired_size = self.size
+		self.desired_extension = self.extension
 
 		# Compression output
 		self.proc = None
@@ -153,7 +154,7 @@ class App:
 		self.spacer_2.pack()
 
 		# Output
-		self.output_frame = LabelFrame(root, width = 420, height = 190)
+		self.output_frame = LabelFrame(root, text = 'Output', width = 420, height = 190)
 		self.output_frame.pack()
 		self.output_frame.pack_propagate(0)
 
@@ -257,7 +258,6 @@ class App:
 	def move_ffmpeg(self):
 		if self.os == 'Windows':
 			files = self.get_files()
-
 			found_files = False
 
 			for name in files:
@@ -347,7 +347,7 @@ class App:
 
 		print('PVC: Video duration: ' + str(origin_duration_s))
 
-		target_audio_bitrate_kbit_s = 64000
+		target_audio_bitrate_kbit_s = 128000
 
 		print(f'PVC: Set file size: {self.desired_size}MB')
 
@@ -386,19 +386,22 @@ class App:
 
 	def update_output(self):
 		line = self.proc.stdout.readline()
-		print(line)
+		# print(line)
 
 		if self.aborted:
-			self.output_field.configure(text = 'Aborted!\nThis may be due to too many duplicate frames or a manual abort. If you did not manually abort compression, try matching the framerate to the original video.')
+			self.output_frame.configure(text = 'Aborted!')
+			self.output_field.configure(text = 'Compression aborted.')
 			self.is_compressing = False
 			self.cur_queue = 0
 		elif 'failed' in line:
+			self.output_frame.configure(text = 'Failed!')
 			self.output_field.configure(text = f'Video {self.cur_queue + 1}/{len(self.files)} failed!\nTry again with different settings.')
 			self.is_compressing = False
 			self.cur_queue = 0
 		elif self.proc.poll() or line == '':
 			if self.cur_queue + 1 == len(self.files):
-				self.output_field.configure(text = f'Completed!\nVideo(s) can be found in the Output folder.')
+				self.output_frame.configure(text = 'Done!')
+				self.output_field.configure(text = f'Video(s) can be found in the Output folder.')
 				self.is_compressing = False
 				self.cur_queue = 0
 
@@ -434,8 +437,10 @@ class App:
 
 			self.cur_video_progress_sec = (h * 3600) + (m * 60) + s
 			self.cur_video_progress_percent = int((self.cur_video_progress_sec / self.cur_video_length) * 100)
-
-			self.output_field.configure(text = f'Compressing video {self.cur_queue + 1}/{len(self.files)} to {self.desired_w}x{self.desired_h} {self.desired_fps}fps @ {self.desired_size}MB\nProgress: {self.cur_video_progress_percent}% (2 passes)\nFFMPEG Output\n{str(line)}', wraplength=370)
+			self.cur_video_progress_percent = min(100, max(0, self.cur_video_progress_percent))
+			self.output_frame.configure(text = f'Output')
+			# self.output_field.configure(text = f'{str(line)}', wraplength=370)
+			self.output_field.configure(text = f'Compressing {self.cur_queue + 1}/{len(self.files)} to {self.desired_w}x{self.desired_h} {self.desired_fps}fps @ {self.desired_size}MB\nProgress: {self.cur_video_progress_percent}% (2 passes)')
 			root.update()
 			root.after(1, self.update_output())
 
